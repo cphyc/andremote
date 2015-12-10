@@ -23,7 +23,6 @@ class Mouse:
 
     def updateAfter(fun):
         def fun_wrapper(this, *args):
-            print(this, *args)
             args = [xdt] + fun(this, *args) + ['getmouselocation']
             proc = subprocess.run(args,
                                   stdout=subprocess.PIPE,
