@@ -268,6 +268,13 @@ class Instruction:
         return (['keydown'] + self.parseOptions(**kwargs) + [key] + list(keys))
 
     @addInstr
+    def mouseDown(self, key, *keys, **kwargs):
+        return (['mousedown'] + self.parseOptions(**kwargs) + [key] + list(keys))
+
+    @addInstr
+    def mouseUp(self, key, *keys, **kwargs):
+        return (['mouseup'] + self.parseOptions(**kwargs) + [key] + list(keys))
+    @addInstr
     def mouseMove(self, x, y, relative=False, **kwargs):
         if relative == True:
             return self._mouseMoveRelative(x, y, **kwargs)
@@ -282,25 +289,115 @@ class Instruction:
         return (['mousemove_relative'] + self.parseOptions(**kwargs) + ['--', str(dx), str(dy)])
 
     @addInstr
+    def setWindow(self, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['set_window'] + self.parseOptions(**kwargs) + l_window)
+    
+    @addInstr
     def type(self, args):
         return (['type', args])
 
+    @addInstr
+    def windowActivate(self, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowactivate'] + self.parseOptions(**kwargs) + l_window)
 
+    @addInstr
+    def windowFocus(self, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowfocus'] + self.parseOptions(**kwargs) + l_window)
+
+    @addInstr
+    def windowKill(self, window=None):
+        l_window = [window] if window is not None else []
+        return (['windowkill'] + l_window)
+
+    @addInstr
+    def windowMap(self, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowmap'] + self.parseOptions(**kwargs) + l_window)
+
+    @addInstr
+    def windowMinimize(self, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowminimize'] + self.parseOptions(**kwargs) + l_window) 
     
+    @addInstr
+    def windowMove(self, x, y, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowminimize'] + self.parseOptions(**kwargs) +
+                l_window + [str(x), str(y)])
+
+    @addInstr
+    def windowRaise(self, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowraise'] + self.parseOptions(**kwargs) + l_window) 
+
+    @addInstr
+    def windowReparent(self, windowDestination, windowSource=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowreparent'] + self.parseOptions(**kwargs) +
+                l_window + [str(windowDestination)])
+    
+    @addInstr
+    def windowSize(self, width, height, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowminimize'] + self.parseOptions(**kwargs) +
+                l_window + [str(width), str(height)])
+
+    @addInstr
+    def windowUnmap(self, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['windowunmap'] + self.parseOptions(**kwargs) + l_window)
+
+    @addInstr
+    def setNumDesktop(self, n):
+        return (['set_num_desktops', str(n)])
+
+    @addInstr
+    @addCallback
+    def getNumDesktops(self):
+        parser = lambda g: {'n_desktop': self.intParser(g)}
+        return (parser, ['get_num_desktops'])
+    
+    @addInstr
+    def setDesktop(self, n, **kwargs):
+        return (['set_desktop'] + self.parseOptions(**kwargs) + [str(n)])
+
+    @addInstr
+    @addCallback
+    def getDesktop(self):
+        parser = lambda g: {'desktop': self.intParser(g)}
+        return (parser, ['get_desktop'])
+
+    @addInstr
+    def setDesktopForWindow(self, n, window=None, **kwargs):
+        l_window = [window] if window is not None else []
+        return (['set_desktop_for_window'] + self.parseOptions(**kwargs) + l_window + [str(n)])
+
+    @addInstr
+    @addCallback
+    def getDesktopForWindow(self):
+        l_window = [window] if window is not None else []
+        parser = lambda g: {'desktop': self.intParser(g)}
+        return (parser, ['get_desktop_for_window'] + l_window)
+
+
+    def setDesktopViewport(self):
+        print('Unsupported')
+
+    def getDesktopViewport(self):
+        print('Unsupported')
     @addInstr
     def sleep(self, time):
         return (['sleep', time])
 
-    @addInstr
-    @addCallback
-    def get_desktop(self):
-        return (lambda s: {'desktop': int(s)}, ['get_desktop'])
 
 # # i = Instruction().getActiveWindow().exec()
 # # print(i.stdout)
-# i = Instruction().getWindowFocus().exec()
-# id = i.stdout[0]['window']
-# print(i.stdout)
+i = Instruction().getWindowFocus().exec()
+id = i.stdout[0]['window']
+print(i.stdout)
 
 # i = Instruction().getWindowName(id).exec()
 # print(i.stdout)
@@ -325,4 +422,5 @@ class Instruction:
 
 # i = Instruction().getMouseLocation().exec()
 # print(i.stdout)
-i = Instruction().mouseMove(10, 10, relative=True).exec()
+# i = Instruction().mouseMove(10, 10, relative=True).exec()
+i = Instruction().windowActivate(id).exec()
