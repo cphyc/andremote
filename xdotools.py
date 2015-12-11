@@ -242,24 +242,50 @@ class Instruction:
         print('Unsupported')
 
     @addInstr
-    def click(self, button):
-        return (['click', str(button)])
-    
-    @addInstr
-    def mousemove_relative(self, dx, dy):
-        return (['mousemove_relative', '--', str(dx), str(dy)])
+    def click(self, button, **kwargs):
+        return (['click'] + self.parseOptions(**kwargs) + [button])
 
     @addInstr
-    def mousemove(self, x, y):
-        return (['mousemove', '--', str(x), str(y)])
+    @addCallback
+    def getMouseLocation(self):
+        def parser(g):
+            line = next(g)
+            x, y, screen, window = [int(e.split(':')[1]) for e in line.split()]
+            return { 'x': x, 'y': y, 'screen': screen, 'window': window }
+                                    
+        return (lambda g: parser(g), ['getmouselocation'])
+
+    @addInstr
+    def key(self, key, *keys, **kwargs):
+        return (['key'] + self.parseOptions(**kwargs) + [key] + list(keys))
+
+    @addInstr
+    def keyDown(self, key, *keys, **kwargs):
+        return (['keydown'] + self.parseOptions(**kwargs) + [key] + list(keys))
+
+    @addInstr
+    def keyUp(self, key, *keys, **kwargs):
+        return (['keydown'] + self.parseOptions(**kwargs) + [key] + list(keys))
+
+    @addInstr
+    def mouseMove(self, x, y, relative=False, **kwargs):
+        if relative == True:
+            return self._mouseMoveRelative(x, y, **kwargs)
+        else:
+            return (['mousemove'] + self.parseOptions(**kwargs) + ['--', str(x), str(y)])
+
+    @addInstr
+    def mouseMoveRelative(self, *args, **kwargs):
+        return self._mouseMoveRelative(self, *args, **kwargs)
+    
+    def _mouseMoveRelative(self, dx, dy, **kwargs):
+        return (['mousemove_relative'] + self.parseOptions(**kwargs) + ['--', str(dx), str(dy)])
 
     @addInstr
     def type(self, args):
         return (['type', args])
 
-    @addInstr
-    def key(self, keys):
-        return (['key', keys])
+
     
     @addInstr
     def sleep(self, time):
@@ -267,41 +293,36 @@ class Instruction:
 
     @addInstr
     @addCallback
-    def getmouselocation(self):
-        def mouseLocationParser(string):
-            out = string.split()
-            return {
-                'x': int(out[0].split(':')[1]),
-                'y': int(out[1].split(':')[1])
-                }
-
-        return (mouseLocationParser, ['getmouselocation'])
-
-    @addInstr
-    @addCallback
     def get_desktop(self):
         return (lambda s: {'desktop': int(s)}, ['get_desktop'])
 
-# i = Instruction().getActiveWindow().exec()
+# # i = Instruction().getActiveWindow().exec()
+# # print(i.stdout)
+# i = Instruction().getWindowFocus().exec()
+# id = i.stdout[0]['window']
 # print(i.stdout)
-i = Instruction().getWindowFocus().exec()
-id = i.stdout[0]['window']
-print(i.stdout)
 
-i = Instruction().getWindowName(id).exec()
-print(i.stdout)
-
-i = Instruction().getWindowPid(id).exec()
-print(i.stdout)
-
-i = Instruction().getWindowGeometry(id).exec()
-print(i.stdout)
-
-i = Instruction().getDisplayGeometry().exec()
-print(i.stdout)
-
-i = Instruction().search('emacs', name=True, onlyvisible=True).exec()
-print(i.stdout)
-
-# i = Instruction().selectWindow().exec()
+# i = Instruction().getWindowName(id).exec()
 # print(i.stdout)
+
+# i = Instruction().getWindowPid(id).exec()
+# print(i.stdout)
+
+# i = Instruction().getWindowGeometry(id).exec()
+# print(i.stdout)
+
+# i = Instruction().getDisplayGeometry().exec()
+# print(i.stdout)
+
+# i = Instruction().search('emacs', name=True, onlyvisible=True).exec()
+# print(i.stdout)
+
+# # i = Instruction().selectWindow().exec()
+# # print(i.stdout)
+
+# i = Instruction().click(4).exec()
+# print(i.stdout)
+
+# i = Instruction().getMouseLocation().exec()
+# print(i.stdout)
+i = Instruction().mouseMove(10, 10, relative=True).exec()
